@@ -15,12 +15,70 @@ In this project, we will model monthly BLS jobs data 12 months out in three diff
 
 ## Part One: VAR Model (Connor)
 Load Pagkages
-```{r}
+```{r, results = FALSE, messages= FALSE, results='hide', echo=FALSE, warning = FALSE}
 library(tseries)
 library(forecast)
 library(vars)
 library(tidyverse)
 library(lubridate)
+```
+
+Load and clean data
+```{r, results = FALSE, messages= FALSE, results='hide', echo=FALSE, warning = FALSE}
+# Load data from our Github repository
+jobs_data <- read_csv("https://raw.githubusercontent.com/co237/forecasting_final/main/jobs_data.csv")
+# Format date variable
+jobs_data$Month <- as.Date(jobs_data$Month, "%m/%d/%Y")
+# Drop pre-1976 data for full panel
+jobs = jobs_data[-c(1:449),]
+jobs <- jobs[ c(1,2,3,4,5,6,8,9,10,11,12,13,14) ]
+# Create Time Series
+jobs_national <- ts(jobs$Jobs,
+                    start = c(1976,1),
+                    end = c(2020, 4),
+                    frequency = 12)
+
+tenyr <- ts(jobs$Ten_yr_Treasury,
+             start = c(1976,1),
+             end = c(2020, 4),
+             frequency = 12)
+
+recession <- ts(jobs$NBER_Recession,
+                      start = c(1976,1),
+                      end = c(2020, 4),
+                      frequency = 12)
+
+population <- ts(jobs$Population,
+                start = c(1976,1),
+                end = c(2020, 4),
+                frequency = 12)
+
+Ind_Production <- ts(jobs$Industrial_Production,
+                 start = c(1976,1),
+                 end = c(2020, 4),
+                 frequency = 12)
+
+financial_conditions <- ts(jobs$Chi_Fed_NFCI,
+                     start = c(1976,1),
+                     end = c(2020, 4),
+                     frequency = 12)
+
+cpi <- ts(jobs$CPI,
+                           start = c(1976,1),
+                           end = c(2020, 4),
+                           frequency = 12)
+
+treasury_spread <- ts(jobs$T10Y2YM,
+          start = c(1976,1),
+          end = c(2020, 4),
+          frequency = 12)
+
+```
+
+Total U.S. (non-farm) employment over time:
+
+```{r}
+plot(jobs_national, ylab = "Jobs", main = "U.S. Non-Farm Employment, 1976-Today")
 ```
 
 Model
