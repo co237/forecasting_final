@@ -93,8 +93,15 @@ VAR_est
 
 Forecast 12 months out
 ```{r}
-forecasts <- predict(VAR_est, h = 12) 
-plot(forecasts)
+forecasts <- predict(VAR_est, h = 14) 
+forecast_data <- forecast(VAR_est, h = 12)
+
+forecasted_jobs <- ts(forecast_data$forecast$jobs_national$mean,
+                      start = c(2021,4),
+                           end = c(2022, 3),
+                           frequency = 12)
+seqplot.ts(jobs_national, forecasted_jobs, xlab = "Jobs", main = "Actual (Black) and Forecasted (Red) U.S. Non-Famr Jobs")
+
 ```
 
 
