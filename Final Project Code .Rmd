@@ -1,0 +1,47 @@
+---
+title: "Time Series and Forecasting Final Project"
+author: "Connor O'Brien, Ross Cole, Zakir Bekenov"
+date: "6/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+
+In this project, we will model monthly BLS jobs data 12 months out in three different ways.  
+
+## Part One: VAR Model (Connor)
+Load Pagkages
+```{r}
+
+```
+
+Model
+```{r}
+
+```
+
+##  Part Two: (Ross )
+Load Packages 
+```{r}
+
+```
+
+Model
+```{r}
+
+```
+
+## Part Three: (Zakir)
+Load Packages 
+```{r}
+
+```
+
+Model
+```{r}
+# model
+```
