@@ -2,7 +2,9 @@
 title: "Time Series and Forecasting Final Project"
 author: "Connor O'Brien, Ross Cole, Zakir Bekenov"
 date: "6/4/2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -93,15 +95,45 @@ VAR_est
 
 Forecast 12 months out
 ```{r}
-forecasts <- predict(VAR_est, h = 14) 
 forecast_data <- forecast(VAR_est, h = 12)
 
 forecasted_jobs <- ts(forecast_data$forecast$jobs_national$mean,
                       start = c(2021,4),
                            end = c(2022, 3),
                            frequency = 12)
-seqplot.ts(jobs_national, forecasted_jobs, xlab = "Jobs", main = "Actual (Black) and Forecasted (Red) U.S. Non-Famr Jobs")
 
+jobs_since_2010 <- ts(jobs_national[404:538],
+                  start = c(2010,1),
+                           end = c(2021, 3),
+                           frequency = 12)
+
+seqplot.ts(jobs_since_2010, forecasted_jobs, xlab = "Jobs", main = "Actual (Black) and Forecasted (Red) U.S. Non-Famr Jobs")
+
+
+```
+
+Look-back
+```{r}
+VAR_data_lookback <- window(ts.union(jobs_national, tenyr, recession, population, Ind_Production, financial_conditions, cpi, treasury_spread), start = c(1976, 6), end = c(2018, 12))
+
+VAR_est2 <- VAR(y =VAR_data_lookback, p = 2)
+
+forecast_data_2 <- forecast(VAR_est2, h = 12)
+
+
+forecasted_jobs2 <- ts(forecast_data_2$forecast$jobs_national$mean,
+                      start = c(2019,1),
+                           end = c(2019, 12),
+                           frequency = 12)
+
+recent_jobs <- ts(jobs_national[488:523],
+                  start = c(2017,1),
+                           end = c(2019, 12),
+                           frequency = 12)
+
+ts.plot(forecast_data_2$forecast$jobs_national$mean, recent_jobs,gpars = list(col = c("red", "black")))
+
+accuracy(forecasted_jobs2, recent_jobs)
 ```
 
 
