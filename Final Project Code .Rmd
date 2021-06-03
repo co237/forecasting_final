@@ -16,7 +16,11 @@ In this project, we will model monthly BLS jobs data 12 months out in three diff
 ## Part One: VAR Model (Connor)
 Load Pagkages
 ```{r}
-
+library(tseries)
+library(forecast)
+library(vars)
+library(tidyverse)
+library(lubridate)
 ```
 
 Model
