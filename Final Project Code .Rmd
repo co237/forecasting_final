@@ -77,17 +77,54 @@ treasury_spread <- ts(jobs$T10Y2YM,
           end = c(2021, 3),
           frequency = 12)
 
+jobs_national_chg <- diff(jobs_national, lag = 1)
+jobs_national_chg <- ts(jobs_national_chg,
+          start = c(1976,7),
+          end = c(2021, 3),
+          frequency = 12)
+tenyr_chg <- diff(tenyr, lag = 1)
+tenyr_chg <- ts(tenyr_chg,
+          start = c(1976,7),
+          end = c(2021, 3),
+          frequency = 12)
+population_chg<- diff(population, lag = 1)
+population_chg <- ts(population_chg,
+          start = c(1976,7),
+          end = c(2021, 3),
+          frequency = 12)
+Ind_Production_chg<- diff(Ind_Production, lag = 1)
+Ind_Production_chg <- ts(Ind_Production_chg,
+          start = c(1976,7),
+          end = c(2021, 3),
+          frequency = 12)
+financial_conditions_chg<- diff(financial_conditions, lag = 1)
+financial_conditions_chg <- ts(financial_conditions_chg,
+          start = c(1976,7),
+          end = c(2021, 3),
+          frequency = 12)
+cpi_chg<- diff(cpi, lag = 1)
+cpi_chg <- ts(cpi_chg,
+          start = c(1976,7),
+          end = c(2021, 3),
+          frequency = 12)
+treasury_spread_chg<- diff(treasury_spread, lag = 1)
+treasury_spread_chg <- ts(treasury_spread_chg,
+          start = c(1976,7),
+          end = c(2021, 3),
+          frequency = 12)
+
 ```
 
 Total U.S. (non-farm) employment over time:
 
 ```{r}
 plot(jobs_national, ylab = "Jobs", main = "U.S. Non-Farm Employment, 1976-Today")
+plot(jobs_national_chg, ylab = "Jobs", main = "Monthly Job Gain/Joss, 1976-Today")
 ```
 
 Model: VAR with one and two lag variables
 ```{r results = FALSE, messages= FALSE, results='hide', echo=FALSE, warning = FALSE}
-VAR_data <- window(ts.union(jobs_national, tenyr, recession, population, Ind_Production, financial_conditions, cpi, treasury_spread), start = c(1976, 6), end = c(2021, 3))
+VAR_data <- window(ts.union(jobs_national_chg, tenyr_chg, recession, population_chg, Ind_Production_chg, financial_conditions_chg, cpi_chg, treasury_spread_chg), start = c(1976, 7), end = c(2021, 3))
 VAR_est <- VAR(y =VAR_data, p = 2)
 VAR_est     
 
@@ -97,43 +134,43 @@ Forecast 12 months out
 ```{r}
 forecast_data <- forecast(VAR_est, h = 12)
 
-forecasted_jobs <- ts(forecast_data$forecast$jobs_national$mean,
+forecasted_jobs_chg <- ts(forecast_data$forecast$jobs_national_chg$mean,
                       start = c(2021,4),
                            end = c(2022, 3),
                            frequency = 12)
 
-jobs_since_2010 <- ts(jobs_national[404:538],
+jobs_since_2010_chg <- ts(jobs_national_chg[404:538],
                   start = c(2010,1),
                            end = c(2021, 3),
                            frequency = 12)
-
-seqplot.ts(jobs_since_2010, forecasted_jobs, xlab = "Jobs", main = "Actual (Black) and Forecasted (Red) U.S. Non-Famr Jobs")
+seqplot.ts(jobs_since_2010_chg, forecasted_jobs_chg, ylab = "Monthly chang ein jobs", main = "Actual (Black) and Forecasted (Red) U.S. Non-Farm Job Growth")
 
 
 ```
 
 Look-back
 ```{r}
-VAR_data_lookback <- window(ts.union(jobs_national, tenyr, recession, population, Ind_Production, financial_conditions, cpi, treasury_spread), start = c(1976, 6), end = c(2018, 12))
+VAR_data_lookback <- window(ts.union(jobs_national_chg, tenyr_chg, recession, population_chg, Ind_Production_chg, financial_conditions_chg, cpi_chg, treasury_spread_chg), start = c(1976, 7), end = c(2018, 12))
 
 VAR_est2 <- VAR(y =VAR_data_lookback, p = 2)
 
 forecast_data_2 <- forecast(VAR_est2, h = 12)
 
 
-forecasted_jobs2 <- ts(forecast_data_2$forecast$jobs_national$mean,
+forecasted_jobs2_chg <- ts(forecast_data_2$forecast$jobs_national_chg$mean,
                       start = c(2019,1),
                            end = c(2019, 12),
                            frequency = 12)
 
-recent_jobs <- ts(jobs_national[488:523],
-                  start = c(2017,1),
+recent_jobs_chg <- ts(jobs_national_chg[464:523],
+                  start = c(2015,1),
                            end = c(2019, 12),
                            frequency = 12)
 
-ts.plot(forecast_data_2$forecast$jobs_national$mean, recent_jobs,gpars = list(col = c("red", "black")))
+ts.plot(forecast_data_2$forecast$jobs_national_chg$mean, recent_jobs_chg,gpars = list(col = c("red", "black")), Main="Monthly Job Growth vs Predicted", ylab = "Monthly Jobs Added")
 
-accuracy(forecasted_jobs2, recent_jobs)
+accuracy(forecasted_jobs2_chg, recent_jobs_chg)
+
 ```
 
 
