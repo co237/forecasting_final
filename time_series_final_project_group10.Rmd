@@ -103,14 +103,16 @@ stl_fcast_pre_covid <- forecast(stl_model, h = 60)
 stl_fcast_full <- forecast(stl_model, h = 76)
 
 # Test accuracy
+print('Pre-covid')
 accuracy(stl_fcast_pre_covid, df.test.pre.covid) %>% print()
+print('All data')
 accuracy(stl_fcast_full, df.test) %>% print()
 
 # Look at the decomposition
 df.train[,1] %>% stl(s.window = "periodic", t.window = 13, robust = TRUE) %>% autoplot()
-autoplot(stl_fcast_pre_covid) +
+autoplot(stl_fcast_pre_covid, main = '') +
     autolayer(df.test.pre.covid)
-autoplot(stl_fcast_full) + 
+autoplot(stl_fcast_full, main = '') + 
     autolayer(df.test)
 
 
@@ -123,15 +125,17 @@ stl_fcast_pre_covid <- forecast(stl_model, h = 60)
 stl_fcast_full <- forecast(stl_model, h = 76)
 
 # Test accuracy
+print('Pre-covid')
 accuracy(stl_fcast_pre_covid, diff(df.test.pre.covid)) %>% print()
+print("All data")
 accuracy(stl_fcast_full, diff(df.test)) %>% print()
 
 # Look at the decomposition
 df.train[,1] %>% diff() %>% stl(s.window = "periodic", t.window = 13, robust = TRUE) %>% autoplot()
-autoplot(stl_fcast_pre_covid) +
-    autolayer(diff(df.test.pre.covid))
-autoplot(stl_fcast_full) +
-    autolayer(diff(df.test))
+autoplot(stl_fcast_pre_covid, main = '') +
+    autolayer(diff(df.test.pre.covid), series = 'Actual') 
+autoplot(stl_fcast_full, main = '') +
+    autolayer(diff(df.test), series = 'Actual') 
 
 
 ```
