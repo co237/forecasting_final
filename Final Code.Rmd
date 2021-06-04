@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 ## Introduction 
@@ -295,16 +295,13 @@ title: "LSTM Model"
 author: "ZAKIR BEKENOV"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
 
 #Packages
 install.packages("keras")
 install.packages("tensorflow")
 install.packages("Metrics")
 
-```{r}
+```{r, eval =FALSE}
 #Library
 library(keras)
 library(tensorflow)
@@ -315,7 +312,8 @@ library(dplyr)
 library(forecast)
 library(Metrics)
 ```
-```{r}
+
+```{r, eval =FALSE}
 getwd()
 setwd("/Users/zakirbekenov/Desktop/Spring 2021/Time Series Analysis/project")
 df <- read_csv("PAYEMS.csv")
@@ -326,14 +324,15 @@ df$DATE <- as.Date(df$DATE, "%Y-%M-%D")
 ggplot(df, aes(x=DATE, y = PAYEMS)) + geom_line()
 ```
 
-```{r}
+```{r, eval =FALSE}
 #Transform data to stationary
 ##Remove first row as we cannot difference
 dateID <- df$DATE[2:nrow(df)]
 diff <- diff(df$PAYEMS, differencs = 1)
 head(diff)
 ```
-```{r}
+
+```{r, eval =FALSE}
 ##LSTM expects the data to be in a supervised learning mode
 
 supervised <- as.data.frame(cbind(lag(diff,1), diff))
@@ -341,7 +340,7 @@ supervised[is.na(supervised)] <- 0
 head(supervised)
 ```
 
-```{r}
+```{r, eval =FALSE}
 #Split dataset into training and testing sets
 #Unlike in most analysis where training and testing data sets are randomly sampled, 
 ##with time series data the order of the observations does matter.
@@ -462,6 +461,6 @@ head(lstmMAE)
 
 You can also embed plots, for example:
 
-```{r}
+```{r, eval =FALSE}
 plot.ts(predictions, col = "red")
 ```
