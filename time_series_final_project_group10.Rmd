@@ -1,0 +1,137 @@
+---
+title: 'Forecasting Total Nonfarm Employment'
+author: "Ross Cole"
+date: "6/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r set-options, echo=FALSE, include = FALSE}
+options(width=120)
+#options("scipen"=100, "digits"=8)
+options("warn" = -1)
+library(dplyr)
+library(xts)
+library(forecast)
+library(lubridate)
+library(ggplot2)
+library(quantmod)
+library(TSstudio)
+library(astsa)
+library(urca)
+library(tseries)
+```
+
+## {.tabset .tabset-pills}
+
+### Load data
+
+```{r, echo = FALSE}
+
+# Pull total nonfarm employment from FRED
+getSymbols('PAYEMS', src = 'FRED') # All Employees, Total Nonfarm, Establishment Survey
+
+# Split into test and train samples
+df <- xts_to_ts(window(PAYEMS), frequency = 12)
+df.train <- xts_to_ts(window(PAYEMS, end = '2014-12-31'), frequency = 12)
+df.test <- xts_to_ts(window(PAYEMS, start = '2015-01-01', end = '2021-05-01'), frequency = 12)
+df.test.pre.covid <- xts_to_ts(window(PAYEMS, start = '2015-01-01', end = '2019-12-31'))
+
+# Plot the time series
+autoplot(PAYEMS, main = 'Total Nonfarm Payrolls') + ylab('')
+
+```
+
+### Exploratory data analysis
+
+Here we look at plots of the training and test samples of the raw data. Looking
+at the ADF test we can see that the time series is **not** stationary, with a p-value
+of X. However, when the data are first differenced the p-value is Y, and we can reject the null hypothesis that the data aren't stationary.
+
+
+```{r}
+
+# Plot the data
+autoplot(window(df.train, start = 1940), main = 'Level') +
+    geom_line(linetype = "dashed", color = 'black') + 
+    geom_point(color = 'blue', size = 2) +
+    autolayer(df.test, series = 'Test') + 
+    theme(aspect.ratio = .75) + ylab('')
+autoplot(window(diff(df.train), start = 1940), main = 'First differences') +
+    geom_line(linetype = "dashed", color = 'black') + 
+    geom_point(color = 'blue', size = 2) +
+    autolayer(diff(df.test), series = 'Test') + 
+    theme(aspect.ratio = .75) + ylab('')
+acf(df, main = 'ACF of training data')
+
+# Check for stationarity using the augmented dickey fuller test & KPSS Unit Root Test
+df %>% tseries::adf.test() %>% print()
+df %>% ur.kpss() %>% summary()
+
+# Now check the differenced series
+df %>% diff() %>% tseries::adf.test() %>% print()
+df %>% diff() %>% ur.kpss() %>% summary()
+
+```
+
+### STL decomposition
+
+Here we use the seasonal and trend decomposition using Loess. This model is particularly
+well suited for this time-series since the seasonal component can change over time - this series
+is cyclical by nature, but the cycles don't follow a specific period.
+
+There are two parameters we need to set. 
+
+1. `t.window` - controls how rapidly the trend-cycle component can change
+2. `s.window` - controls how rapidly the seasonal component can change
+
+They specify the number of consecutive years to use when estimating the trend-cycle and seasonal components
+
+```{r, echo = FALSE}
+
+# Run the STL model on levels
+stl_model <- stl(df.train[,1], s.window = "periodic", t.window = 13, robust = TRUE)
+summary(stl_model)
+
+# Create forecasts for the pre-covid and post covid periods
+stl_fcast_pre_covid <- forecast(stl_model, h = 60)
+stl_fcast_full <- forecast(stl_model, h = 76)
+
+# Test accuracy
+accuracy(stl_fcast_pre_covid, df.test.pre.covid) %>% print()
+accuracy(stl_fcast_full, df.test) %>% print()
+
+# Look at the decomposition
+df.train[,1] %>% stl(s.window = "periodic", t.window = 13, robust = TRUE) %>% autoplot()
+autoplot(stl_fcast_pre_covid) +
+    autolayer(df.test.pre.covid)
+autoplot(stl_fcast_full) + 
+    autolayer(df.test)
+
+
+# Run the STL model on differences
+stl_model <- stl(diff(df.train[,1]), s.window = "periodic", t.window = 13, robust = TRUE)
+summary(stl_model)
+
+# Create forecasts for the pre-covid and post covid periods
+stl_fcast_pre_covid <- forecast(stl_model, h = 60)
+stl_fcast_full <- forecast(stl_model, h = 76)
+
+# Test accuracy
+accuracy(stl_fcast_pre_covid, diff(df.test.pre.covid)) %>% print()
+accuracy(stl_fcast_full, diff(df.test)) %>% print()
+
+# Look at the decomposition
+df.train[,1] %>% diff() %>% stl(s.window = "periodic", t.window = 13, robust = TRUE) %>% autoplot()
+autoplot(stl_fcast_pre_covid) +
+    autolayer(diff(df.test.pre.covid))
+autoplot(stl_fcast_full) +
+    autolayer(diff(df.test))
+
+
+```
